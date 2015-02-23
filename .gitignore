@@ -1,1 +1,5 @@
+*.iml
+
+.idea/
+bin/
 node_modules/
