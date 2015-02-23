@@ -3,7 +3,7 @@ var mongojs = require("mongojs"),
 
 var reviews = exports;
 
-var db = mongojs('mongodb://192.168.1.115:27017/picturedb', ['reviews']);
+var db = mongojs('mongodb://localhost:27017/picturedb', ['reviews']);
 
 db.on('error',function(err) {
     console.log('database error', err);
@@ -18,17 +18,20 @@ reviews.createPictureReview = function(review, callback) {
     var rating = review['rating'];
     var comments = review['comments'];
 
-    console.log('Updating DB with {p}, {r}, {c}'
-        .replace('{p}', pictureUrl)
-        .replace('{r}', rating))
-        .replace('{c}', comments);
+    db.reviews.findOne({url: pictureUrl}, function (err, doc) {
 
-    db.reviews.find({url: pictureUrl}, function (err, doc) {
+        if (err) return callback(err);
+
         if (!doc) {
-            db.reviews.insert({
+            db.reviews.save({
                 url: pictureUrl,
                 rating: rating || '',
                 comments: comments || ''
+            }, function(err, doc) {
+                if (err) return callback(err);
+
+                console.log("Created picture review document for URL: " + pictureUrl);
+                console.log(JSON.stringify(doc));
             });
         } else {
             if (rating) {
@@ -36,6 +39,11 @@ reviews.createPictureReview = function(review, callback) {
                     $set: {
                         rating: rating
                     }
+                }, function(err, doc) {
+                    if (err) return callback(err);
+
+                    console.log("Updated picture review document for URL: " + pictureUrl);
+                    console.log(JSON.stringify(doc));
                 });
             }
 
@@ -44,8 +52,15 @@ reviews.createPictureReview = function(review, callback) {
                     $set: {
                         comments: comments
                     }
+                }, function(err, doc) {
+                    if (err) return callback(err);
+
+                    console.log("Updated picture review document for URL: " + pictureUrl);
+                    console.log(JSON.stringify(doc));
                 });
             }
         }
+
+        callback();
     });
 };
