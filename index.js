@@ -1,19 +1,40 @@
 var Hapi = require('hapi'),
+    Path = require('path'),
     reviews = require('./middleware/reviews');
 
 var server = new Hapi.Server();
 var port = Number(process.env.PORT || process.argv[2] || 3000);
-
 server.connection({port: port});
+
+server.views({
+    engines: { jade: require('jade') },
+    path: Path.join(__dirname, 'views')
+});
+
+console.log("Path is: " + Path.join(__dirname, 'views'));
 
 server.route([
     {
-        method: '*',
-        path: '/{p*}',
-        handler: function (request, reply) {
-            log(request);
+        method: 'GET',
+        path: '/css/{p*}',
+        handler: {
+            directory: {
+                path: "views/css",
+                listing: false,
+                index: false
+            }
+        }
+    },
 
-            reply("Path or method not supported.").code(400);
+    {
+        method: 'GET',
+        path: '/img/{p*}',
+        handler: {
+            directory: {
+                path: "views/img",
+                listing: false,
+                index: false
+            }
         }
     },
 
@@ -23,7 +44,16 @@ server.route([
         handler: function (request, reply) {
             log(request);
 
-            reply('Welcome to the Picture Reviews back end!');
+            reviews.getAllReviews(function (err, reviewList) {
+                    if (err) {
+                        reply(err).code(500);
+                        return;
+                    }
+
+                    reply.view('index', { reviews: reviewList });
+                }
+            );
+
         }
     },
 
@@ -42,6 +72,22 @@ server.route([
 
                 reply(data);
             });
+        }
+    },
+
+    {
+        method: 'GET',
+        path: '/reviews',
+        handler: function (request, reply) {
+            reviews.getAllReviews(function (err, doc) {
+                    if (err) {
+                        reply(err).code(500);
+                        return;
+                    }
+
+                    reply(doc);
+                }
+            );
         }
     }
 ]);

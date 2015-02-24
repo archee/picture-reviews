@@ -1,5 +1,4 @@
-var mongojs = require("mongojs"),
-    assert = require("assert");
+var mongojs = require("mongojs")
 
 var reviews = exports;
 
@@ -12,6 +11,16 @@ db.on('error',function(err) {
 db.on('ready',function() {
     console.log('database connected');
 });
+
+reviews.getAllReviews = function(callback) {
+    db.reviews.find({}, function( err, doc ) {
+        if (err) {
+            return callback(err);
+        }
+
+        return callback(null, doc);
+    });
+};
 
 reviews.createPictureReview = function(review, callback) {
     var pictureUrl = review['pictureUrl'];

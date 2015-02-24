@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        link(rel='icon' type='image/x-icon' href='img/ic_launcher.ico')
+
+        title Picture Reviews
+
+        link(href='css/bootstrap.min.css', rel='stylesheet')
+        link(rel='stylesheet' href='css/style.css')
+
+    body
+        h1 Picture Reviews
+        .col-lg-12
+            table(class='table table-striped')
+                thead: tr
+                        th URL
+                        th Rating
+                        th Comments
+                each val in reviews
+                    tr
+                        td: a(href= val.url): =val.url
+                        td= val.rating
+                        td= val.comments
